@@ -1,5 +1,7 @@
 import express from 'express'
 import path from 'path'
+import axios from 'axios' // импортировать axios
+
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import sockjs from 'sockjs'
@@ -34,6 +36,31 @@ const middleware = [
 ]
 
 middleware.forEach((it) => server.use(it))
+
+// добавим в наш код новый путь и сделаем запрос асинхронным
+// route
+server.get('/api/v1/users/', async (req, res) => {
+  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+  res.json(users)
+})
+
+// можно сделать вывод определенного количества пользователей, в зависимости от переданного параметра
+server.get('/api/v1/users/take/:number', async (req, res) => {
+  const { number } = req.params
+  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+  res.json(users.slice(0, +number))
+})
+
+// // зайдя по пути localhost:8090/api/v1/users мы увидим объект { name: 'Anna' }
+// server.get('/api/v1/users', (req, res) => {
+//   res.json({ name: 'Anna' })
+// })
+
+// // После внесения данных изменений мы можем что-то дописывать в конце пути и наш объект будет изменяться в зависимсоти от изменений внесённых в путь.
+// server.get('/api/v1/users/:name', (req, res) => {
+//   const { name } = req.params
+//   res.json({ name })
+// })
 
 server.use('/api/', (req, res) => {
   res.status(404)
